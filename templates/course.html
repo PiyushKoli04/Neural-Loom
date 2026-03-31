@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.subject }} — Neural-Loom{% endblock %}
+
+{% block content %}
+<!-- Course hero -->
+<div class="course-hero">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <span>›</span>
+      <span>{{ course.subject }}</span>
+    </div>
+    <h1>{{ course.subject }}</h1>
+    <p style="margin-top:0.3rem;">
+      {% set modules = course.structure.modules if course.structure and course.structure.modules else [] %}
+      {{ modules | length }} module{{ 's' if modules|length != 1 else '' }} ·
+      {{ topics | length }} topic{{ 's' if topics|length != 1 else '' }}
+    </p>
+
+    <div style="margin-top:1rem; display:flex; gap:0.6rem; flex-wrap:wrap;">
+      <form method="POST" action="{{ url_for('delete_course', course_id=course._id) }}"
+            onsubmit="return confirm('Delete this course and all its data?')">
+        <button class="btn btn-ghost btn-sm" type="submit" style="color:var(--warn); border-color:var(--warn);">
+          Delete Course
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="modules-layout">
+
+    <!-- Sidebar -->
+    <aside class="module-sidebar">
+      <div class="sidebar-title">Contents</div>
+      {% set modules = course.structure.modules if course.structure and course.structure.modules else [] %}
+      {% for mod in modules %}
+      <div class="module-group">
+        <div class="module-group-title">{{ mod.title }}</div>
+        {% for topic in mod.topics %}
+        <a class="topic-link"
+           href="{{ url_for('lesson', course_id=course._id, topic=topic) }}">
+          {{ topic }}
+        </a>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </aside>
+
+    <!-- Main -->
+    <div class="main-content">
+      {% set modules = course.structure.modules if course.structure and course.structure.modules else [] %}
+      {% for mod in modules %}
+      <div class="module-card">
+        <div class="module-card-header">
+          <div class="module-card-title">{{ mod.title }}</div>
+          <span class="tag tag-accent">{{ mod.topics | length }} topic{{ 's' if mod.topics|length != 1 else '' }}</span>
+        </div>
+        <div class="topics-list">
+          {% for topic in mod.topics %}
+          <div class="topic-row">
+            <span class="topic-name">{{ topic }}</span>
+            <div class="topic-actions">
+              <a class="btn btn-outline btn-sm"
+                 href="{{ url_for('lesson', course_id=course._id, topic=topic) }}">
+                📖 Learn
+              </a>
+              <a class="btn btn-ghost btn-sm"
+                 href="{{ url_for('quiz', course_id=course._id, topic=topic) }}">
+                ✏️ Quiz
+              </a>
+              <a class="btn btn-ghost btn-sm"
+                 href="{{ url_for('challenge', course_id=course._id, topic=topic) }}">
+                🚀 Challenge
+              </a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+
+      {% if not modules %}
+      <div class="empty-state" style="padding:2rem;">
+        <p>No modules found. Please re-create the course with a more detailed syllabus.</p>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

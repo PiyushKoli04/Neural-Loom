@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — Neural-Loom{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="dashboard-header">
+    <h1>Welcome back, <span>{{ user_name }}</span></h1>
+    <p style="color:var(--text-3); margin-top:0.3rem; font-size:0.9rem;">
+      Your courses and learning progress
+    </p>
+  </div>
+
+  <div class="dashboard-actions">
+    <h2 style="font-size:1.1rem; font-weight:600; color:var(--text);">
+      My Courses
+      <span class="tag" style="margin-left:0.5rem; font-family:var(--font-body);">
+        {{ courses | length }}
+      </span>
+    </h2>
+    <a class="btn btn-primary" href="{{ url_for('new_course') }}">
+      + New Course
+    </a>
+  </div>
+
+  <div class="courses-grid">
+    {% if not courses %}
+    <div class="empty-state">
+      <div class="empty-icon">📚</div>
+      <h3>No courses yet</h3>
+      <p>Create your first course by uploading a syllabus and Neural-Loom will build your lessons automatically.</p>
+      <a class="btn btn-primary btn-lg" href="{{ url_for('new_course') }}">Create your first course</a>
+    </div>
+    {% endif %}
+
+    {% for course in courses %}
+    <div class="course-card" onclick="window.location='{{ url_for('course', course_id=course._id) }}'">
+      <div class="course-card-subject">{{ course.subject }}</div>
+      <div class="course-card-meta">
+        Created {{ course.created_at.strftime('%b %d, %Y') if course.created_at else 'Recently' }}
+      </div>
+      <div class="course-card-modules">
+        {% set modules = course.structure.modules if course.structure and course.structure.modules else [] %}
+        <span class="tag tag-accent">{{ modules | length }} module{{ 's' if modules|length != 1 else '' }}</span>
+        {% set topic_count = namespace(n=0) %}
+        {% for mod in modules %}{% set topic_count.n = topic_count.n + (mod.topics | length) %}{% endfor %}
+        <span class="tag">{{ topic_count.n }} topic{{ 's' if topic_count.n != 1 else '' }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Neural-Loom{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  {% block head %}{% endblock %}
+</head>
+<body
+  data-course-id="{{ course_id | default('') }}"
+  data-topic="{{ topic | default('') | urlencode }}"
+>
+
+{% if session.user_id %}
+<!-- ── Navbar ── -->
+<nav class="navbar">
+  <div class="container navbar-inner">
+    <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+      <span class="logo-dot"></span> Neural-Loom
+    </a>
+    <ul class="navbar-nav">
+      {% block nav_extra %}{% endblock %}
+      <!-- Engagement indicator (only visible on lesson/challenge pages) -->
+      <li id="engagement-indicator" class="engagement-badge engagement-focused" style="display:none;">
+        🟢 Focused
+      </li>
+      <li>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      </li>
+      <li>
+        <a href="{{ url_for('logout') }}">Logout</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+{% endif %}
+
+<!-- ── Flash messages ── -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="container">
+      <ul class="flash-list">
+        {% for category, message in messages %}
+          <li class="flash flash-{{ category }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+{% endwith %}
+
+<!-- ── Page content ── -->
+<div class="page-wrap">
+  {% block content %}{% endblock %}
+</div>
+
+<!-- ── MediaPipe (lazy-loaded only when needed) ── -->
+{% block scripts %}{% endblock %}
+
+{% if course_id is defined and course_id and topic is defined and topic %}
+<!-- Show engagement indicator when on lesson/challenge page -->
+<script>
+  const ind = document.getElementById('engagement-indicator');
+  if (ind) ind.style.display = '';
+</script>
+<!-- MediaPipe Face Mesh + Camera utils -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+<script src="{{ url_for('static', filename='js/camera.js') }}"></script>
+{% endif %}
+
+</body>
+</html>

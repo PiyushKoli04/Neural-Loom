@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}New Course — Neural-Loom{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="form-page">
+    <div class="breadcrumb">
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <span>›</span>
+      <span>New Course</span>
+    </div>
+
+    <h1 style="margin-bottom:0.4rem;">Create a Course</h1>
+    <p style="margin-bottom:1.75rem; color:var(--text-3); font-size:0.93rem;">
+      Paste your syllabus and Neural-Loom will generate structured lessons, quizzes, and an adaptive learning plan.
+    </p>
+
+    <div class="form-card">
+      <form method="POST" action="{{ url_for('new_course') }}">
+
+        <div class="form-group">
+          <label class="form-label" for="subject">Subject / Course Name</label>
+          <input
+            class="form-control"
+            type="text"
+            id="subject"
+            name="subject"
+            placeholder="e.g. Physics — Mechanics, Python Programming, World History"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="syllabus">Syllabus</label>
+          <textarea
+            class="form-control"
+            id="syllabus"
+            name="syllabus"
+            rows="8"
+            placeholder="Paste your syllabus, curriculum outline, or list of topics here.
+
+Example:
+Unit 1: Kinematics
+- Distance, displacement, speed, velocity
+- Uniform acceleration
+- Equations of motion
+
+Unit 2: Newton's Laws
+- First law (inertia)
+- Second law (F = ma)
+- Third law (action-reaction)"
+            required
+          ></textarea>
+          <p class="form-hint">Paste any format — Neural-Loom will parse it automatically using AI.</p>
+        </div>
+
+        <div class="form-section-title">Optional — Reference Material</div>
+
+        <div class="form-group">
+          <label class="form-label" for="books">Reference Books / Notes</label>
+          <textarea
+            class="form-control"
+            id="books"
+            name="books"
+            rows="3"
+            placeholder="e.g. Halliday & Resnick — Fundamentals of Physics (Ch. 2-5)"
+          ></textarea>
+          <p class="form-hint">Optional. Helps tailor lesson depth and examples.</p>
+        </div>
+
+        <div style="display:flex; gap:0.75rem; margin-top:1.5rem; flex-wrap:wrap;">
+          <button class="btn btn-primary btn-lg" type="submit">
+            ✦ Generate Course
+          </button>
+          <a class="btn btn-ghost" href="{{ url_for('dashboard') }}">Cancel</a>
+        </div>
+
+      </form>
+    </div>
+
+    <div style="margin-top:1.5rem; padding:1rem 1.25rem; background:var(--surface-2); border-radius:var(--radius-sm); border:1px solid var(--border);">
+      <p style="font-size:0.82rem; color:var(--text-3); margin:0;">
+        <strong style="color:var(--text-2);">How it works:</strong>
+        Gemini AI will analyse your syllabus → extract topics → build learning modules.
+        Lessons are generated on demand. Quizzes are created by Groq AI.
+        Eye tracking adapts the teaching style in real time.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

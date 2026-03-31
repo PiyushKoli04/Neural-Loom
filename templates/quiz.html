@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Quiz: {{ topic }} — Neural-Loom{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="quiz-wrap">
+    <div class="breadcrumb" style="padding-top:1.5rem;">
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <span>›</span>
+      <a href="{{ url_for('course', course_id=course._id) }}">{{ course.subject }}</a>
+      <span>›</span>
+      <a href="{{ url_for('lesson', course_id=course._id, topic=topic) }}">{{ topic }}</a>
+      <span>›</span>
+      <span>Quiz</span>
+    </div>
+
+    <div class="quiz-header">
+      <h1 style="margin-top:0.75rem;">Quiz: {{ topic }}</h1>
+      <p style="color:var(--text-3); margin-top:0.3rem; font-size:0.9rem;">
+        {{ questions | length }} questions · Select the best answer for each
+      </p>
+    </div>
+
+    <!-- Score banner (shown after submit) -->
+    <div id="score-banner" class="quiz-score" style="display:none;">
+      <div class="score-number" id="score-display">0/{{ questions | length }}</div>
+      <p style="margin-top:0.4rem; color:var(--text-3); font-size:0.9rem;" id="score-msg">Loading…</p>
+      <div style="margin-top:1rem; display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap;">
+        <a class="btn btn-primary"
+           href="{{ url_for('lesson', course_id=course._id, topic=topic) }}">
+          📖 Review Lesson
+        </a>
+        <a class="btn btn-ghost"
+           href="{{ url_for('course', course_id=course._id) }}">
+          ← Back to Course
+        </a>
+      </div>
+    </div>
+
+    <!-- Questions -->
+    <form id="quiz-form">
+      {% for q in questions %}
+      <div class="question-card" id="qcard-{{ loop.index0 }}" data-answer="{{ q.answer }}">
+        <div class="question-num">Question {{ loop.index }}</div>
+        <div class="question-text">{{ q.question }}</div>
+        <ul class="options-list">
+          {% for opt in q.options %}
+          <li>
+            <label class="option-label">
+              <input type="radio" name="q{{ loop.index0 }}" value="{{ opt[0] }}" />
+              {{ opt }}
+            </label>
+          </li>
+          {% endfor %}
+        </ul>
+        <div class="explanation-box" id="exp-{{ loop.index0 }}">
+          <strong>Explanation:</strong> {{ q.explanation }}
+        </div>
+      </div>
+      {% endfor %}
+
+      <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+        <button class="btn btn-primary btn-lg" type="button" onclick="submitQuiz()">
+          Submit Answers
+        </button>
+        <a class="btn btn-ghost"
+           href="{{ url_for('lesson', course_id=course._id, topic=topic) }}">
+          ← Back to Lesson
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const TOTAL = {{ questions | length }};
+
+function submitQuiz() {
+  let score = 0;
+
+  for (let i = 0; i < TOTAL; i++) {
+    const card   = document.getElementById('qcard-' + i);
+    const answer = card.dataset.answer;        // e.g. "A"
+    const radios = document.querySelectorAll(`input[name="q${i}"]`);
+    const expBox = document.getElementById('exp-' + i);
+
+    let selected = null;
+    radios.forEach(r => { if (r.checked) selected = r.value; });
+
+    expBox.classList.add('show');
+
+    if (!selected) {
+      card.style.borderColor = 'var(--border)';
+      continue;
+    }
+
+    // Compare first char of selected option with answer letter
+    const sel = selected.charAt(0).toUpperCase();
+    const ans = answer.charAt(0).toUpperCase();
+
+    if (sel === ans) {
+      score++;
+      card.classList.add('correct');
+    } else {
+      card.classList.add('wrong');
+    }
+  }
+
+  // Show score
+  const pct = Math.round((score / TOTAL) * 100);
+  const msgs = {
+    high:   "Excellent work! You've mastered this topic. 🎉",
+    mid:    "Good effort! Review the explanations above to strengthen your understanding.",
+    low:    "Keep going — everyone starts somewhere. Read the lesson again and retry.",
+  };
+  const msg = pct >= 80 ? msgs.high : pct >= 50 ? msgs.mid : msgs.low;
+
+  document.getElementById('score-display').textContent = `${score}/${TOTAL}`;
+  document.getElementById('score-msg').textContent      = msg;
+
+  const banner = document.getElementById('score-banner');
+  banner.style.display = 'block';
+  banner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  // Disable all radios
+  document.querySelectorAll('#quiz-form input[type="radio"]').forEach(r => r.disabled = true);
+
+  // Hide submit button
+  document.querySelector('button[onclick="submitQuiz()"]').style.display = 'none';
+}
+</script>
+{% endblock %}

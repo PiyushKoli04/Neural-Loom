@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% set course_id = course._id | string %}
+
+{% block title %}{{ topic }} — Neural-Loom{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="lesson-layout">
+
+    <!-- Main lesson body -->
+    <div>
+      <div class="breadcrumb" style="padding-top:1.5rem;">
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <span>›</span>
+        <a href="{{ url_for('course', course_id=course._id) }}">{{ course.subject }}</a>
+        <span>›</span>
+        <span>{{ topic }}</span>
+      </div>
+
+      <div class="lesson-body" style="margin-top:0.75rem;">
+        <div class="lesson-header">
+          <!-- Style badge -->
+          {% if style == 'normal' %}
+            <div class="style-badge style-normal">📘 Standard Lesson</div>
+          {% elif style == 'simplified' %}
+            <div class="style-badge style-simplified">💡 Simplified — You looked confused</div>
+          {% elif style == 'story' %}
+            <div class="style-badge style-story">✨ Story Mode</div>
+          {% elif style == 'interactive' %}
+            <div class="style-badge style-interactive">🚀 Interactive Mode</div>
+          {% endif %}
+
+          <h1 style="font-size:1.6rem;">{{ topic }}</h1>
+          <p style="font-size:0.85rem; color:var(--text-3); margin-top:0.3rem;">
+            {{ course.subject }}
+          </p>
+        </div>
+
+        <div class="lesson-content">
+          {{ content_html | safe }}
+        </div>
+
+        {% if analogy %}
+        <div class="analogy-box">
+          <div class="analogy-label">💛 Analogy</div>
+          <p>{{ analogy }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Bottom nav -->
+        <div style="margin-top:2rem; padding-top:1.25rem; border-top:1px solid var(--border); display:flex; gap:0.75rem; flex-wrap:wrap;">
+          <a class="btn btn-primary"
+             href="{{ url_for('quiz', course_id=course._id, topic=topic) }}">
+            ✏️ Take Quiz
+          </a>
+          <a class="btn btn-outline"
+             href="{{ url_for('challenge', course_id=course._id, topic=topic) }}">
+            🚀 Try Challenge
+          </a>
+          <a class="btn btn-ghost"
+             href="{{ url_for('course', course_id=course._id) }}">
+            ← Back to Course
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="lesson-sidebar" style="padding-top:1.5rem;">
+
+      <!-- Teaching mode switcher -->
+      <div class="sidebar-card">
+        <h4>Teaching Mode</h4>
+        <div class="mode-buttons">
+          <a class="btn {% if style == 'normal' %}btn-primary{% else %}btn-ghost{% endif %} btn-sm"
+             href="{{ url_for('lesson', course_id=course._id, topic=topic, style='normal') }}">
+            📘 Standard
+          </a>
+          <a class="btn {% if style == 'simplified' %}btn-primary{% else %}btn-ghost{% endif %} btn-sm"
+             href="{{ url_for('lesson', course_id=course._id, topic=topic, style='simplified') }}">
+            💡 Simplified
+          </a>
+          <a class="btn {% if style == 'story' %}btn-primary{% else %}btn-ghost{% endif %} btn-sm"
+             href="{{ url_for('lesson', course_id=course._id, topic=topic, style='story') }}">
+            ✨ Story Mode
+          </a>
+        </div>
+      </div>
+
+      <!-- Eye tracking status -->
+      <div class="sidebar-card">
+        <h4>Eye Tracking</h4>
+        <p style="font-size:0.83rem; color:var(--text-3); margin-bottom:0.75rem;">
+          Neural-Loom is monitoring your engagement and will automatically adapt
+          the lesson if you seem confused or bored.
+        </p>
+        <div id="engagement-indicator-sidebar"
+             style="font-size:0.82rem; font-family:var(--font-mono); color:var(--text-3);">
+          Initialising…
+        </div>
+      </div>
+
+      <!-- Quick links -->
+      <div class="sidebar-card">
+        <h4>Quick Actions</h4>
+        <div class="mode-buttons">
+          <a class="btn btn-ghost btn-sm"
+             href="{{ url_for('quiz', course_id=course._id, topic=topic) }}">
+            ✏️ Quiz on this topic
+          </a>
+          <a class="btn btn-ghost btn-sm"
+             href="{{ url_for('challenge', course_id=course._id, topic=topic) }}">
+            🚀 Challenge mode
+          </a>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Sync sidebar indicator with navbar badge
+const navBadge  = document.getElementById('engagement-indicator');
+const sideBadge = document.getElementById('engagement-indicator-sidebar');
+
+if (navBadge && sideBadge) {
+  const observer = new MutationObserver(() => {
+    sideBadge.textContent = navBadge.textContent;
+    sideBadge.style.color = navBadge.classList.contains('engagement-focused')  ? '#1a6b3a'
+                           : navBadge.classList.contains('engagement-confused') ? '#7a5c00'
+                           : '#8b1a14';
+  });
+  observer.observe(navBadge, { childList: true, characterData: true, subtree: true });
+}
+</script>
+{% endblock %}

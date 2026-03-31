@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% set course_id = course._id | string %}
+
+{% block title %}Challenge: {{ topic }} — Neural-Loom{% endblock %}
+
+{% block content %}
+<div class="challenge-page">
+
+  <!-- Hero -->
+  <div class="challenge-hero">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <span>›</span>
+        <a href="{{ url_for('course', course_id=course._id) }}">{{ course.subject }}</a>
+        <span>›</span>
+        <span>{{ topic }}</span>
+        <span>›</span>
+        <span>Challenge</span>
+      </div>
+
+      <div class="challenge-mission-badge">
+        🚀 MISSION MODE
+      </div>
+      <h1>{{ challenge.mission }}</h1>
+      <p style="margin-top:0.3rem;">{{ course.subject }} · {{ topic }}</p>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="container">
+    <div class="challenge-grid">
+
+      <!-- Left: mission + story lesson -->
+      <div>
+
+        <!-- Mission card -->
+        <div class="mission-card" style="margin-bottom:1.5rem;">
+          <div class="mission-card-header">
+            <h3>🎯 Your Mission</h3>
+            <p>{{ challenge.scenario }}</p>
+          </div>
+          <div class="mission-body">
+
+            <div class="mission-section">
+              <div class="mission-section-label">The Task</div>
+              <p>{{ challenge.task }}</p>
+            </div>
+
+            <div class="hint-box" id="hint-box"
+                 onclick="this.classList.add('revealed')">
+              <div class="hint-label">💡 Need a hint?</div>
+              <div class="hint-toggle" style="font-size:0.85rem; color:var(--text-3);">
+                Tap to reveal
+              </div>
+              <div class="hint-content">{{ challenge.hint }}</div>
+            </div>
+
+            <div class="solution-box" id="sol-box">
+              <div style="font-weight:600; color:var(--info); margin-bottom:0.3rem; cursor:pointer;"
+                   onclick="document.getElementById('sol-box').classList.add('revealed')">
+                <span class="sol-toggle">✅ Show Solution</span>
+              </div>
+              <div class="solution-content">{{ challenge.solution }}</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Story lesson -->
+        <div class="story-lesson">
+          <h4>📖 Lesson — Interactive Mode</h4>
+          <div class="lesson-content">
+            {{ story_html | safe }}
+          </div>
+
+          <div style="margin-top:1.5rem; padding-top:1rem; border-top:1px solid var(--border); display:flex; gap:0.75rem; flex-wrap:wrap;">
+            <a class="btn btn-primary"
+               href="{{ url_for('quiz', course_id=course._id, topic=topic) }}">
+              ✏️ Test Your Knowledge
+            </a>
+            <a class="btn btn-outline"
+               href="{{ url_for('lesson', course_id=course._id, topic=topic, style='normal') }}">
+              📘 Standard Lesson
+            </a>
+            <a class="btn btn-ghost"
+               href="{{ url_for('course', course_id=course._id) }}">
+              ← Course
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="challenge-sidebar">
+
+        <!-- XP / Progress -->
+        <div class="sidebar-card">
+          <h4>Progress</h4>
+          <div class="xp-badge">
+            <div class="xp-num" id="xp-counter">0</div>
+            <div class="xp-label">XP earned</div>
+          </div>
+          <div style="margin-top:1rem;">
+            <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-3); margin-bottom:0.3rem;">
+              <span>Challenge Progress</span>
+              <span id="pct-label">0%</span>
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" id="progress-fill" style="width:0%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Eye tracking status -->
+        <div class="sidebar-card">
+          <h4>Engagement Tracking</h4>
+          <p style="font-size:0.83rem; color:var(--text-3);">
+            Neural-Loom detected you needed something more engaging. This challenge mode
+            will re-energise your learning.
+          </p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="sidebar-card">
+          <h4>Switch Mode</h4>
+          <div style="display:flex; flex-direction:column; gap:0.5rem;">
+            <a class="btn btn-ghost btn-sm"
+               href="{{ url_for('lesson', course_id=course._id, topic=topic, style='normal') }}">
+              📘 Standard Lesson
+            </a>
+            <a class="btn btn-ghost btn-sm"
+               href="{{ url_for('lesson', course_id=course._id, topic=topic, style='simplified') }}">
+              💡 Simplified Lesson
+            </a>
+            <a class="btn btn-ghost btn-sm"
+               href="{{ url_for('lesson', course_id=course._id, topic=topic, style='story') }}">
+              ✨ Story Mode
+            </a>
+            <a class="btn btn-ghost btn-sm"
+               href="{{ url_for('quiz', course_id=course._id, topic=topic) }}">
+              ✏️ Take Quiz
+            </a>
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Animate XP counter when page loads — gives gamified feel
+(function () {
+  const xpEl    = document.getElementById('xp-counter');
+  const fillEl  = document.getElementById('progress-fill');
+  const pctEl   = document.getElementById('pct-label');
+  const target  = 250;   // XP awarded for opening challenge
+  let current   = 0;
+  const step    = Math.ceil(target / 60);
+
+  const interval = setInterval(() => {
+    current = Math.min(current + step, target);
+    xpEl.textContent = current;
+    const pct = Math.round((current / target) * 45); // Challenge = 45% of this topic
+    fillEl.style.width = pct + '%';
+    pctEl.textContent  = pct + '%';
+    if (current >= target) clearInterval(interval);
+  }, 25);
+})();
+</script>
+{% endblock %}

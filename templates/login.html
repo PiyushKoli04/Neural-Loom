@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — Neural-Loom</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div style="position:fixed;top:1rem;right:1rem;z-index:999;min-width:280px;">
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}" style="margin-bottom:0.5rem;">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <h1>Neural-Loom</h1>
+      <p>Your adaptive AI learning companion</p>
+    </div>
+
+    <h2>Sign in</h2>
+
+    <form method="POST" action="{{ url_for('login') }}">
+      <div class="form-group">
+        <label class="form-label" for="email">Email</label>
+        <input
+          class="form-control"
+          type="email"
+          id="email"
+          name="email"
+          placeholder="you@example.com"
+          required
+          autocomplete="email"
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input
+          class="form-control"
+          type="password"
+          id="password"
+          name="password"
+          placeholder="••••••••"
+          required
+          autocomplete="current-password"
+        />
+      </div>
+
+      <button class="btn btn-primary btn-full btn-lg" type="submit" style="margin-top:0.5rem;">
+        Sign in →
+      </button>
+    </form>
+
+    <p style="text-align:center; margin-top:1.5rem; font-size:0.87rem; color:var(--text-3);">
+      Don't have an account?
+      <a href="{{ url_for('register') }}" style="font-weight:600;">Create one</a>
+    </p>
+  </div>
+</div>
+
+</body>
+</html>
